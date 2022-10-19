@@ -1,0 +1,279 @@
+---
+title: "Case_Study_Bellabeat"
+author: "Yandel Morel"
+date: "2022-10-19"
+output: html_document
+---
+# Google Data Analytics Professional Certificate - Capstone Project
+# Case Study - Bellabeat
+Bellabeat is a company that serves to improve the well-being of women with their line of smart devices that monitor activity, sleep, stress, menstrual cycles, and mindfulness habits. Their desire is to comprehend the most common uses of popular smart devices, and apply the insights to their own marketing. 
+
+This document will serve to prepare, process, analyze, and visualize FitBit data obtained from Kaggle, as well as information from Verto Analytics, in order to understand how consumers are utilizing their smart devices. With this information, insights and conclusions will be derived to create suggestions and actionable next steps for Bellabeat's marketing strategy.
+
+## Installing and loading common packages and libraries
+```{r packages + libraries}
+#install.packages("tidyverse") in the console
+library(tidyverse)
+library(lubridate)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+```
+
+## Load the CSV files
+The Daily Activity, Sleep Day, Weight Log and Heart Rate files will be read and loaded into a data frame.
+
+```{r load csv files}
+daily_activity <- read.csv("dailyActivity_merged.csv")
+sleep_day <- read.csv("sleepDay_merged.csv")
+weight_log <- read.csv("weightLogInfo_merged.csv")
+heart_rate <- read.csv("heartrate_seconds_merged.csv")
+```
+
+
+## Explore the data tables 
+For each dataset, I will preview the first few rows, observe column names, and see how many people are in the dataset.
+
+The **Daily Activity** dataset shows the steps, distance, minutes, and calories from exercising per day for each of the 33 participants.
+```{r daily activity}
+head(daily_activity)
+colnames(daily_activity)
+n_distinct(daily_activity$Id)
+```
+
+
+**Sleep Day** - shows the number of sleep records and total minutes asleep per day for 24 participants.
+```{r sleep day}
+head(sleep_day)
+colnames(sleep_day)
+n_distinct(sleep_day$Id)
+```
+
+
+**Weight Log** - shows the weight (kilograms and pounds), fat, and BMI for 8 participants.
+```{r weight log}
+head(weight_log)
+colnames(weight_log)
+n_distinct(weight_log$Id)
+```
+
+
+**Heart Rate** - shows the heart rate every time it changed (recording the hour, minute, and second), and it was logged per day for 14 participants.
+```{r heart rate}
+head(heart_rate)
+colnames(heart_rate)
+n_distinct(heart_rate$Id)
+
+```
+
+
+Out of 33 total participants, a greater number of participants tracked their calories, steps, distance traveled, and sleep. There were a smaller number of participants who recorded heart rate and weight over time.
+
+Since the heart rate and weight log datasets include less than half of the participants, these datasets will not be analyzed because it would be statistically insignificant due to their small sample size.
+
+
+
+## Clean and Format the Data
+All of the datasets have a column for a date, which is currently formatted as a string. I will format them from a character string to a date-time format. I will also combine the Daily Activity and Sleep Day datasets into one.
+
+```{r formattting date and time}
+# format date for daily activity
+daily_activity$ActivityDate <- as.Date(daily_activity$ActivityDate, format = "%m/%d/%Y")
+
+# rename the date column
+names(daily_activity)[2] <- 'LogDate'
+
+# format date for sleep day
+sleep_day$SleepDay <- as.Date(sleep_day$SleepDay, format = "%m/%d/%Y")
+
+# rename the date column
+names(sleep_day)[2] <- 'LogDate'
+
+# view the dataset to confirm the formatting has changed
+head(daily_activity)
+head(sleep_day)
+
+# combine daily activity and sleep day
+combined_daily_sleep <- merge(daily_activity, sleep_day, by=c("Id", "LogDate"))
+head(combined_daily_sleep)
+
+```
+
+
+## Analyze the Data
+The analysis will focus on the combined data sets containing Daily Activity and Sleep Day information by observing summary statistics.
+
+```{r summary statistics}
+# summary statistics for steps, minutes asleep, calories, and minutes of various active levels
+combined_daily_sleep %>% 
+  select(TotalSteps, Calories, VeryActiveMinutes, FairlyActiveMinutes, LightlyActiveMinutes, SedentaryMinutes, TotalMinutesAsleep, TotalTimeInBed) %>% 
+  summary()
+
+
+```
+
+#### Key Statistics from Participants in this Dataset:
+* The average steps taken per day is 8,541.
+* The average time spent sleeping per day is 419 minutes, which is 6 hours 59 minutes.
+* The average calories burned per day is 2,398.
+* The majority of minutes awake are spent sedentary, with an average of 712 minutes, which is 11 hours 52 minutes.
+* Light Activity is the most popular activity level, with an average of 216 minutes, or 3 hours 36 minutes, per day.
+
+---> It appears that the average person in this study is striving to take care of their health by walking everyday, aiming for the recommended number of hours of sleep, and burning calories through light exercise.
+
+---> It may be helpful to market Bellabeat products to people who want to take control of their health, take actions towards improving their health, and track their progress.
+
+## Visualize the Data
+Graphs and plots will explore the relationships between variables and reveal any trends within the data.
+
+```{r histograms}
+# histogram for total steps
+hist(combined_daily_sleep$TotalSteps,
+     main = "Total Steps Walked per Day",
+     xlab = "Number of Steps",
+     col = "lightskyblue")
+
+# histogram for lightly active minutes
+hist(combined_daily_sleep$LightlyActiveMinutes,
+     main = "Minutes of Lightly Active Exercise per Day",
+     xlab = "Minutes of Light Activity",
+     col = "lightskyblue")
+
+# histogram for sedentary minutes
+hist(combined_daily_sleep$SedentaryMinutes,
+     main = "Minutes of Sedentary Activity per Day",
+     xlab = "Sedentary Minutes",
+     col = "lightskyblue")
+
+# histogram for calories burned
+hist(combined_daily_sleep$Calories,
+     main = "Calories Burned per Day",
+     xlab = "Calories",
+     col = "lightskyblue")
+
+# histogram for sleep
+hist(combined_daily_sleep$TotalMinutesAsleep,
+     main = "Minutes of Sleep per Day",
+     xlab = "Minutes of Sleep",
+     col = "lightskyblue")
+
+```
+
+#### These histograms served to visualize the summary statistics explored above.
+#### On average, most people
+* walked between 0 to 2,000 steps per day
+* engaged in 1-8 hours of light activity per day
+* were sedentary for at least 5 hours or more
+* burned at least 1,000 calories a day
+* slept around 7 hours in a day
+
+
+Many participants in this study engage in frequent light exercise and strive to sleep for 7 hours. The next step is to explore relationships between exercise, calories burned, and sleep.
+```{r plots}
+# Do people who walk more tend to burn more calories?
+ggplot(combined_daily_sleep, aes(x = TotalSteps, y = Calories)) + 
+  geom_jitter() + 
+  geom_smooth(method = "loess") +
+  labs(title = "Steps Taken vs Calories Burned Per Day", subtitle = "Correlation coefficient = 0.412", caption = "Data obtained from Kaggle")
+
+# calculate the correlation coefficient = 0.4119959
+cor(combined_daily_sleep$TotalSteps, combined_daily_sleep$Calories)
+
+
+# Is there a relationship between sleep and sedentary activity?
+ggplot(combined_daily_sleep, aes(x = TotalMinutesAsleep, y = SedentaryMinutes)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  labs(title = "Sleep vs Sedentary Activity Per Day", subtitle = "Correlation coefficient = -0.599", caption = "Data obtained from Kaggle")
+
+# correlation coefficient = -0.599394
+cor(combined_daily_sleep$TotalMinutesAsleep, combined_daily_sleep$SedentaryMinutes)
+
+
+# Do people who walk more get better sleep?
+ggplot(combined_daily_sleep, aes(x = TotalMinutesAsleep, y = TotalSteps)) +
+  geom_point() +
+  geom_smooth(method = "loess") + 
+  labs(title = "Sleep vs Steps Per Day", subtitle = "Correlation coefficient = -0.187", caption = "Data obtained from Kaggle")
+
+# correlation coefficient = -0.1868665
+cor(combined_daily_sleep$TotalMinutesAsleep, combined_daily_sleep$TotalSteps)
+
+
+# Do people who burn more calories get better sleep?
+ggplot(combined_daily_sleep, aes(x = TotalMinutesAsleep, y = Calories)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  labs(title = "Sleep vs Calories Burned Per Day", subtitle = "Correlation coefficient = -0.029", caption = "Data obtained from Kaggle")
+
+# correlation coefficient = -0.02852571
+cor(combined_daily_sleep$TotalMinutesAsleep, combined_daily_sleep$Calories)
+
+
+# Does the kilometers traveled correlate with the number of calories burned?
+ggplot(combined_daily_sleep, aes(x = TotalDistance, y = Calories)) +
+  geom_jitter() +
+  geom_smooth() +
+  labs(title = "Distance Traveled (kilometers) vs Calories Burned Per Day", subtitle = "Correlation coefficient = 0.528", caption = "Data obtained from Kaggle")
+
+# correlation coefficient = 0.5277278
+cor(combined_daily_sleep$TotalDistance, combined_daily_sleep$Calories)
+
+
+# Do people who travel more distance have higher sleep times?  
+ggplot(combined_daily_sleep, aes(x = TotalMinutesAsleep, y = TotalDistance)) +
+  geom_point()+
+  geom_smooth() +
+  labs(title = "Sleep vs Distance Traveled (kilometers) Per Day", subtitle = "Correlation coefficient = -0.172", caption = "Data obtained from Kaggle")
+
+# correlation coefficient = -0.1721427
+cor(combined_daily_sleep$TotalMinutesAsleep, combined_daily_sleep$TotalDistance)
+
+
+```
+
+
+#### Correlation Coefficient is a statistical measure that indicates the strength of the linear relationship between two variables. It is a number between -1 and 1. 
+* Values closer to zero indicate a weak relationship, and values closer to -1 or 1 indicate strong relationships. 
+* A negative number indicates a negative correlation. As one variable increases, the other variable decreases.
+* A positive number indicates a positive correlation. As one variable increases, the other variable increases as well.
+
+
+#### Important trends to note:
+* Taking more steps in a day is positively correlated with burning more calories in a day. In addition, distance traveled is positively correlated with calories burned.
+* Sleep and sedentary activity are negatively correlated, which can suggest that being more active can contribute to longer sleep.
+* The total steps or distance traveled in a day is not correlated to the amount of sleep obtained per night.
+* Calories burned does not have a correlation to the amount of sleep obtained. 
+
+
+## Utilizing a Second Source of Data
+This data was obtained from Verto Analytics on the most popular health and fitness apps of 2018. [It can be seen by clicking here.](https://drive.google.com/file/d/1PCdKlCUbUC2tpQCeV1-z4AL8kZnFgfva/view?usp=sharing)
+
+
+The most popular apps, such as Fitbit and MyFitnessPal, focus on exericse, diet, weight loss. This shows that users are interested in apps that can help them improve their overall health and help them stay consistent.
+
+## Key Insights
+* Most users are interested in apps that can help them with diet, exercise, calories, sleep, and weight loss.This includes tracking and monitoring these factors on a daily basis.
+* Users were more likely to track their exercise habits, sleep patterns, and calories burned. This may be due to the ease of tracking, as it happens automatically when wearing a smart device. 
+* Tracking weight was less common, and it could be due to the fact that smart devices, such as a watch, are unable to monitor weight. This requires manual tracking from the user and could be more cumbersome.
+
+## Marketing Recommendations
+* It will be beneficial to market Bellabeat products as a device to help people monitor and improve their health, focusing on exercise and sleep.
+* Monitoring the number of steps taken per day, distance traveled, exercise intensity, hours slept, and quality of sleep are areas of focus.
+* Bellabeat products can provide deep insights into these areas of health and fitness. It can serve as a solution for people who want to take control of their health, but may have certain obstacles in place, which can include: 
+    * Not having time to track certain habits 
+    * Feeling unmotivated to track these habits 
+    * Having trouble keeping records in one location
+    * Having trouble being consistent with record-keeping
+* Bellabeat's convenience is appealing because it can track several aspects of our health automatically, and it fits seamlessly into the user's busy daily life.
+* It can serve to motivate the user and send reminders to stand up and go for a walk. Many users spend a lot of time being sedentary, so gentle reminders can be effective.
+* Some users do not get enough sleep, so reminders for sleep can be effective as well.
+* It may be helpful to target customers who want to take their health into their own hands and who want to feel energized, want to create new healthy habits, and who want to feel proud of their growth.
+
+### References
+  1.  Fitbit datasets from Kaggle [here](https://www.kaggle.com/datasets/arashnic/fitbit)
+  2.  Secondary dataset from Verto Analytics [here](https://www.statista.com/statistics/650748/health-fitness-app-usage-usa/) 
+
+
+
+
