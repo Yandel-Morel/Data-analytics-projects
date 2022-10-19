@@ -1,4 +1,4 @@
-# Case-Study-Bellabeat
+# Case Study: Bellabeat
 
 The purpose of this project was to prepare, process, analyze, and visualize FitBit data obtained from Kaggle, and information obtained
 from Verto Analytics, in order to understand how consumers utilize their smart devices. 
