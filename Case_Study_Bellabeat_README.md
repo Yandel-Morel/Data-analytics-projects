@@ -7,3 +7,5 @@ The stakeholder of interest is Bellabeat, a wellness company with smart devices 
 gain more customers and expand their brand.
 
 I performed an analysis using RStudio to import, clean, and graph the data. With the information gained from my analysis, I derived insights and conclusions to create suggestions and actionable next steps that can be applied to Bellabeat's marketing strategy.
+
+To view my project on Kaggle, click [here](https://www.kaggle.com/code/yandelmorel/case-study-bellabeat). To view my R code script, click [here](Case_Study_Bellabeat.Rmd).
