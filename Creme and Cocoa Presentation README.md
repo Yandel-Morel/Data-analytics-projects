@@ -1,8 +1,8 @@
 # Creme and Cocoa Creamery Presentation
 
 This project aimed to prepare, process, analyze, and visualize customer data from Creme and Cocoa Creamery, a Black-owned business 
-based in New York City. The goal was to understand the company's client engagement history via their online platforms in order 
-to expand their audience.
+based in New York City. The goal was to understand the company's client engagement history via its online platforms in order 
+to expand its audience.
 
 Alongside a team, I performed several analyses using Excel to import, clean, and graph the data. With the information gained 
 from our discoveries, my colleagues and I concluded that the business experienced high social media engagement when they nurtured their 
